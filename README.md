@@ -4,7 +4,7 @@ Toilet flush (gravity) mechanism
 
 What does it take to get your shit down??
 
-part 1 ('energy' source): 
+drop down part 1 ('energy' source): 
 What we can vary:
 - tank water level (height)
 - flush valve size
@@ -18,7 +18,7 @@ concepts:
 - hydrostatic pressure (height of tank)
 - bernoulli's equation (exit hole size)
 
-part 2 (distribution network):
+drop down part 2 (distribution network):
 What we can vary:
 - number of rimholes
 - size of holes
@@ -30,9 +30,7 @@ what we can track:
 
 part 3 (overall synthesis):
 What we can vary:
-- tank water volume (can tie to height?)
-- flush valve size
-- size/number of rimholes
+- based on above sliders
 
 what we can track:
-- is the shit still there?
+- is the shit still there? (SUCCESS! vs FAILURE TO FLUSH!)
