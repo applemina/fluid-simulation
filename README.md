@@ -5,6 +5,8 @@ Toilet flush (gravity) mechanism
 What does it take to get your shit down??
 
 drop down part 1 ('energy' source): 
+^^ zoom in to tank + valve portion
+
 What we can vary:
 - tank water level (height)
 - flush valve size
@@ -19,6 +21,8 @@ concepts:
 - bernoulli's equation (exit hole size)
 
 drop down part 2 (distribution network):
+^^ zoom in to hole distribution, rim portion
+
 What we can vary:
 - number of rimholes
 - size of holes
@@ -29,6 +33,8 @@ what we can track:
 - pressure
 
 part 3 (overall synthesis):
+^^ expand to a side view of toilet
+
 What we can vary:
 - based on above sliders
 
