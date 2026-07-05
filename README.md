@@ -26,6 +26,7 @@ drop down part 2 (distribution network):
 What we can vary:
 - number of rimholes
 - size of holes
+- size of rim chamber
 
 what we can track:
 - flow rate of water at different holes
