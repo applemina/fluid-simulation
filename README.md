@@ -4,36 +4,29 @@ Toilet flush (gravity) mechanism
 
 What does it take to get your shit down??
 
-drop down part 1 ('energy' source): 
-^^ zoom in to tank + valve portion
+[Part 1]
+Concept used:
+Bernoulli's equation (head form)
+P1/gamma + v1 ^2/2g + z1 = P2/gamma + v2 ^2/2g + z0
 
 What we can vary:
-- tank water level (height)
-- flush valve size
-- viscosity of liquid used (add some soap solution or smth)
+- tank water level (z1)
+- viscosity of liquid used (use some soap solution or smth)
 
-what we can track:
-- streamlines
-- flow rate of exiting water
+Observation:
+at t = 0+, what are the values of v1 and v2
+v1 and v2 converge as tank water level decreases and viscosity increases
 
-concepts:
-- hydrostatic pressure (height of tank)
-- bernoulli's equation (exit hole size)
-
-drop down part 2 (distribution network):
-^^ zoom in to hole distribution, rim portion
+[Part 2]
+Concept used:
+Mass flow rate - continuity equation
+A1v1ro1 = A2v2ro2
 
 What we can vary:
-- number of rimholes
-- size of holes
-- size of rim chamber
+- sliders for A1/A2 diameter (observing their ratios)
+- shape? (circle vs square)
 
-what we can track:
-- flow rate of water at different holes
-- ceramic wall shear stress
-- pressure
-
-part 3 (overall synthesis):
+[Part 3]
 ^^ expand to a side view of toilet
 
 What we can vary:
