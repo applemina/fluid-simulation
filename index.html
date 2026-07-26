@@ -36,20 +36,24 @@
           <div class="part-num">1</div>
           <div class="part-titles">
             <div class="part-title">Energy Source — Tank &amp; Flush Valve</div>
-            <div class="part-sub">Hydrostatic pressure and Bernoulli/Torricelli flow through the orifice</div>
+            <div class="part-sub">Bernoulli's equation between the free surface (v₁) and the valve exit (v₂)</div>
           </div>
           <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </summary>
         <div class="part-body">
           <div class="viz-frame"><svg id="svgPart1" viewBox="0 0 900 460"></svg></div>
           <p class="concept-note">
-            <b>Hydrostatic pressure:</b> P = ρgH — a taller water column pushes harder on the valve (live substitution shown on the right).
-            <b>Bernoulli / Torricelli:</b> ideal exit speed v = √(2gH), reduced by a viscosity-dependent
-            discharge coefficient C<sub>d</sub> as the liquid gets thicker (water → soap solution → gel cleaner) and the orifice
-            Reynolds number drops. Tank is fixed at 12 cm × 50 cm, matching a real cistern's proportions.
+            <b>Bernoulli (full form):</b> P₁ + ½ρv₁² + ρgH = P₂ + ½ρv₂² between the free surface (1) and the valve
+            exit (2). Rather than assuming v₁ = 0, continuity (A₁v₁ = A₂v₂) ties the surface velocity to the exit
+            velocity through the tank/valve diameter ratio — a wider tank makes that term negligible, a narrower one
+            doesn't. Rather than assuming P₂(gauge) = 0, the valve exit carries a <b>backpressure head</b> from
+            standing water/resistance downstream. Solving for v₂ gives v₂ = √(2g(H−H<sub>back</sub>)/(1−β²)), with
+            β = (d<sub>valve</sub>/d<sub>tank</sub>)². This ideal v₂ is then reduced by a viscosity-dependent discharge
+            coefficient C<sub>d</sub> as the orifice Reynolds number drops. Tank footprint is fixed at 12 cm × 50 cm
+            for volume purposes; the tank diameter slider sets the effective Ø used in continuity.
           </p>
           <div class="mini-readouts">
-            <div class="mini-stat"><div class="lbl">Hydrostatic pressure P</div><div class="val c-teal" id="roPhydro">–</div></div>
+            <div class="mini-stat"><div class="lbl">Net driving pressure ΔP</div><div class="val c-teal" id="roPhydro">–</div></div>
             <div class="mini-stat"><div class="lbl">Discharge coeff. Cd</div><div class="val c-orange" id="roCd">–</div></div>
           </div>
         </div>
@@ -118,6 +122,16 @@
         </div>
 
         <div class="slider-row">
+          <div class="slider-label"><span>Tank diameter <small style="color:var(--muted-dim); font-weight:500;">(v₁, continuity)</small></span><span class="value" id="labelDTank">276 mm</span></div>
+          <input type="range" id="sliderDTank" min="100" max="400" step="1">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Backpressure head <small style="color:var(--muted-dim); font-weight:500;">(P₂, gauge)</small></span><span class="value" id="labelHback">3.0 cm</span></div>
+          <input type="range" id="sliderHback" min="0" max="15" step="0.5">
+        </div>
+
+        <div class="slider-row">
           <div class="slider-label"><span>Viscosity μ <small style="color:var(--muted-dim); font-weight:500;">(log scale)</small></span><span class="value" id="labelMu">1 mPa·s</span></div>
           <input type="range" id="sliderMu" min="0" max="100" step="0.5">
         </div>
@@ -126,6 +140,18 @@
           <button class="preset-btn" data-mu="1">Water (1)</button>
           <button class="preset-btn" data-mu="82">Soap soln. (82)</button>
           <button class="preset-btn" data-mu="500">Gel clnr (500)</button>
+        </div>
+
+        <div class="slider-row" style="margin-top:18px;">
+          <div class="slider-label"><span>Gravitational acceleration g</span><span class="value" id="labelG">9.81 m/s²</span></div>
+          <input type="range" id="sliderG" min="0.5" max="27" step="0.01">
+        </div>
+
+        <div class="preset-row preset-row-4">
+          <button class="preset-btn-g" data-g="1.62">Moon</button>
+          <button class="preset-btn-g" data-g="3.71">Mars</button>
+          <button class="preset-btn-g" data-g="9.81">Earth</button>
+          <button class="preset-btn-g" data-g="24.79">Jupiter</button>
         </div>
       </div>
 
