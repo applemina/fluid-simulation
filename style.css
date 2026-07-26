@@ -315,7 +315,11 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 14px;
 }
 
-.preset-btn {
+.preset-row.preset-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.preset-btn, .preset-btn-g {
   background: #12212f;
   border: 1px solid var(--panel-border);
   color: var(--muted);
@@ -328,8 +332,8 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.15s ease;
 }
 
-.preset-btn:hover { border-color: var(--teal); color: var(--text); }
-.preset-btn.active {
+.preset-btn:hover, .preset-btn-g:hover { border-color: var(--teal); color: var(--text); }
+.preset-btn.active, .preset-btn-g.active {
   background: rgba(45, 212, 191, 0.14);
   border-color: var(--teal);
   color: var(--teal);
