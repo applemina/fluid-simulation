@@ -216,6 +216,110 @@ details.part[open] .chevron { transform: rotate(90deg); color: var(--teal); }
 
 .concept-note b { color: var(--purple); font-weight: 600; }
 
+/* ---------- explanation dropdown ---------- */
+
+details.explanation {
+  margin-top: 14px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: rgba(255,255,255,0.012);
+  overflow: hidden;
+}
+
+details.explanation summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--purple);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+details.explanation summary::-webkit-details-marker { display: none; }
+details.explanation summary::before {
+  content: '▸';
+  display: inline-block;
+  transition: transform 0.2s ease;
+  font-size: 11px;
+}
+details.explanation[open] summary::before { transform: rotate(90deg); }
+
+.explanation-body {
+  padding: 4px 18px 18px;
+  border-top: 1px solid var(--panel-border);
+}
+
+.exp-step {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.exp-step:last-of-type { border-bottom: none; }
+.exp-step-solo .exp-text { max-width: 560px; }
+
+.exp-text { flex: 1.3; min-width: 0; }
+.exp-diagram { flex: 1; min-width: 200px; max-width: 260px; }
+.exp-diagram svg { display: block; width: 100%; height: auto; }
+
+.exp-text h4 {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.exp-text p {
+  margin: 0 0 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.exp-text p b { color: var(--orange); font-weight: 700; }
+
+.eq {
+  background: #0c1826;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  overflow-x: auto;
+}
+
+.exp-footnote {
+  margin: 14px 2px 0;
+  font-size: 11.5px;
+  color: var(--muted-dim);
+  line-height: 1.6;
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .exp-step { flex-direction: column; align-items: stretch; }
+  .exp-diagram { max-width: 100%; }
+}
+
+/* KaTeX theme override to match the dark panel */
+.eq .katex { color: var(--text); font-size: 1.02em; }
+.eq .katex-display { margin: 0; }
+
+/* Shown instead of rendered math if the KaTeX CDN is blocked/offline */
+.eq.eq-fallback {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .mini-readouts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -315,7 +419,11 @@ input[type="range"]::-moz-range-thumb {
   margin-top: 14px;
 }
 
-.preset-btn {
+.preset-row.preset-row-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.preset-btn, .preset-btn-g {
   background: #12212f;
   border: 1px solid var(--panel-border);
   color: var(--muted);
@@ -328,8 +436,8 @@ input[type="range"]::-moz-range-thumb {
   transition: all 0.15s ease;
 }
 
-.preset-btn:hover { border-color: var(--teal); color: var(--text); }
-.preset-btn.active {
+.preset-btn:hover, .preset-btn-g:hover { border-color: var(--teal); color: var(--text); }
+.preset-btn.active, .preset-btn-g.active {
   background: rgba(45, 212, 191, 0.14);
   border-color: var(--teal);
   color: var(--teal);

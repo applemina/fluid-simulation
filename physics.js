@@ -4,11 +4,26 @@ function compute(s) {
   const H = s.H / 100;                 
   const mu = s.mu / 1000;              
   const dValve = s.dValve / 1000;      
+  const g = s.g;                       
   const rValve = dValve / 2;
   const Avalve = Math.PI * rValve * rValve;
 
-  const Phydro = RHO * G * H;
-  const vIdeal = Math.sqrt(2 * G * H);
+  // --- Bernoulli between free surface (1) and valve exit (2) ---
+  // P1 + 1/2 rho v1^2 + rho g H = P2 + 1/2 rho v2^2
+  // We no longer assume v1 = 0 or P2(gauge) = 0:
+  //   v1 is tied to v2 via continuity (A1 v1 = A2 v2, beta = (dValve/dTank)^2)
+  //   P2(gauge) is modeled as an equivalent backpressure head Hback
+  //     (standing water / resistance downstream of the valve)
+  const dTank = s.dTank / 1000;
+  const Hback = s.Hback / 100;
+
+  const beta = dTank > 0 ? Math.pow(dValve / dTank, 2) : 0;
+  const denom = clamp(1 - beta * beta, 0.05, 1); // guard against dValve -> dTank
+  const driveHead = Math.max(0, H - Hback);       // net driving head, can't go negative
+
+  const Phydro = RHO * g * driveHead; // net driving (gauge) pressure difference P1-P2
+  const vIdeal = Math.sqrt((2 * g * driveHead) / denom); // v2, with v1 and backpressure accounted for
+  const v1 = beta * vIdeal; // free-surface velocity, from continuity A1v1 = A2v2
 
   // Empirical viscous discharge-coefficient correction: Cd falls off as
   // orifice Reynolds number drops (same qualitative shape as published
@@ -58,12 +73,13 @@ function compute(s) {
   const Vtank = (TANK_WIDTH_CM / 100) * (TANK_LENGTH_CM / 100) * H; // m^3
   const tFlush = Q > 1e-9 ? Vtank / Q : Infinity; // idealized constant-flow drain time, s
 
-  const QOK = Q_Lps > 0.4;
-  const shearOK = tauWall > 0.08;
-  const success = QOK && shearOK && isFinite(tFlush) && tFlush < 25;
+  const QOK = Q_Lps > 0.7;
+  const shearOK = tauWall > 4;
+  const success = QOK && shearOK && isFinite(tFlush) && tFlush < 11;
 
   return {
-    H, mu, dValve, Avalve, Phydro, vIdeal, Re, Cd, vExit, Q, Q_Lps,
+    H, mu, dValve, g, Avalve, Phydro, vIdeal, Re, Cd, vExit, Q, Q_Lps,
+    dTank, Hback, beta, driveHead, v1,
     dHole, Ahole, AholesTotal, vHole, tauWall, Pdyn, ReHole,
     dChannel, Achannel, channelProfile, vChannelStart, vChannelEnd,
     Vtank, tFlush, QOK, shearOK, success,

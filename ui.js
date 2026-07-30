@@ -2,12 +2,12 @@
 
 // Re-declare your ID mappings here
 const sliderIds = {
-  H: 'sliderH', dValve: 'sliderDValve', mu: 'sliderMu',
+  H: 'sliderH', dValve: 'sliderDValve', dTank: 'sliderDTank', Hback: 'sliderHback', g: 'sliderG', mu: 'sliderMu',
   nHoles: 'sliderNHoles', dHole: 'sliderDHole', rimCavity: 'sliderRimCavity',
 };
 
 const labelIds = {
-  H: 'labelH', dValve: 'labelDValve', mu: 'labelMu',
+  H: 'labelH', dValve: 'labelDValve', dTank: 'labelDTank', Hback: 'labelHback', g: 'labelG', mu: 'labelMu',
   nHoles: 'labelNHoles', dHole: 'labelDHole', rimCavity: 'labelRimCavity',
 };
 
@@ -94,6 +94,8 @@ function bindControls(onUpdate) {
   // 2. Wire up all the basic sliders
   setupSlider('H', v => `${fmt(v,0)} cm`);
   setupSlider('dValve', v => `${fmt(v,0)} mm`);
+  setupSlider('dTank', v => `${fmt(v,0)} mm`);
+  setupSlider('Hback', v => `${fmt(v,1)} cm`);
   setupSlider('nHoles', v => `${fmt(v,0)}`);
   setupSlider('dHole', v => `${fmt(v,1)} mm`);
   setupSlider('rimCavity', v => `${fmt(v,0)} mm`);
@@ -144,6 +146,43 @@ function bindControls(onUpdate) {
   // Set the default preset as active on initial load
   const defaultPreset = document.querySelector('.preset-btn[data-mu="1"]');
   if (defaultPreset) defaultPreset.classList.add('active');
+
+  // 3b. Wire up gravity g (linear scale — different planets, not different fluids)
+  const gEl = document.getElementById(sliderIds.g);
+  const gLbl = document.getElementById(labelIds.g);
+
+  gEl.value = state.g;
+  updateSliderFill(gEl);
+  gLbl.textContent = `${fmt(state.g, 2)} m/s²`;
+
+  gEl.addEventListener('input', () => {
+    state.g = parseFloat(gEl.value);
+    updateSliderFill(gEl);
+    gLbl.textContent = `${fmt(state.g, 2)} m/s²`;
+
+    document.querySelectorAll('.preset-btn-g').forEach(b => b.classList.remove('active'));
+
+    onUpdate();
+  });
+
+  document.querySelectorAll('.preset-btn-g').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const g = parseFloat(btn.dataset.g);
+      state.g = g;
+
+      gEl.value = g;
+      updateSliderFill(gEl);
+      gLbl.textContent = `${fmt(g, 2)} m/s²`;
+
+      document.querySelectorAll('.preset-btn-g').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      onUpdate();
+    });
+  });
+
+  const defaultGPreset = document.querySelector('.preset-btn-g[data-g="9.81"]');
+  if (defaultGPreset) defaultGPreset.classList.add('active');
 
   
   // 4. Wire up the flush button

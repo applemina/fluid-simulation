@@ -7,7 +7,11 @@ function renderPart1(d, s) {
   const W = 900, Hh = 460;
 
   const pxPerCm = 6.2;
-  const tankW = TANK_WIDTH_CM * pxPerCm;
+  // Tank WIDTH in the drawing now tracks the dTank slider (the effective diameter used in
+  // continuity), so users can see it grow/shrink. This is a drawn proxy, not the physical
+  // footprint: Vtank/tFlush still use the fixed 12x50cm rectangular footprint regardless.
+  const pxPerMmTank = 0.55;
+  const tankW = clamp(s.dTank * pxPerMmTank, 30, 260);
   const tankH = TANK_LENGTH_CM * pxPerCm;
   const tankLeft = 130, tankTop = 46;
   const tankRight = tankLeft + tankW, tankBottom = tankTop + tankH;
@@ -46,6 +50,8 @@ function renderPart1(d, s) {
   }
 
   const jetLen = clamp(d.vExit * 34, 18, 110);
+  const jetLenIdealRaw = clamp(d.vIdeal * 34, 18, 130);
+  const jetLenIdeal = Math.min(jetLenIdealRaw, Hh - tankBottom - 40); // keep arrow+label on-canvas at extreme sliders
   const jetStreams = [];
   for (let i = 0; i < 5; i++) {
     const t = i / 4;
@@ -54,19 +60,32 @@ function renderPart1(d, s) {
       stroke="var(--orange)" stroke-width="2.5" opacity="0.8" stroke-linecap="round"/>`);
   }
 
-  const gaugeX = tankRight + 34;
+  // v1 (free-surface) and v2 (ideal valve-exit) velocity vectors + animation speeds.
+  // Faster animateMotion loop = higher velocity; both clamped to stay readable on screen.
+  const surfaceX = tankLeft + tankW * 0.68;
+  const v1ArrowLen = clamp(10 + d.v1 * 400, 12, 60);
+  const v1Dur = clamp(2.4 - d.v1 * 20, 0.5, 2.4).toFixed(2);
+  const v2X = tankLeft - 20;
+  const v2Dur = clamp(2.0 - d.vIdeal * 0.6, 0.35, 2.0).toFixed(2);
+
+  const gaugeX = tankRight + 40;
   const gaugeTop = tankTop, gaugeBottom = tankBottom;
   const gaugeSurfaceY = waterTop;
   const gaugeValveY = tankBottom;
 
-  const eqX = gaugeX + 60, eqY = tankTop + 6;
+  const eqX = gaugeX + 80, eqY = tankTop + 6;
+
+  // Water color shifts teal -> red with viscosity, log-scaled to match the mu slider (1-500 mPa·s).
+  const muT = clamp(Math.log(Math.max(s.mu, 1)) / Math.log(500), 0, 1);
+  const waterTopColor = lerpColor('2dd4bf', 'e5484d', muT);
+  const waterBottomColor = lerpColor('0e9384', '7a1f1f', muT);
 
   const svg = `
   <svg viewBox="0 0 ${W} ${Hh}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="waterGrad1" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.30"/>
-        <stop offset="100%" stop-color="#0e9384" stop-opacity="0.85"/>
+        <stop offset="0%" stop-color="${waterTopColor}" stop-opacity="0.30"/>
+        <stop offset="100%" stop-color="${waterBottomColor}" stop-opacity="0.85"/>
       </linearGradient>
       <linearGradient id="pgaugeGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#12786c" stop-opacity="0.15"/>
@@ -75,10 +94,17 @@ function renderPart1(d, s) {
       <marker id="arrowRed1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 Z" fill="var(--pink)"/>
       </marker>
+      <marker id="arrowPurple1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="var(--purple)"/>
+      </marker>
+      <marker id="arrowTeal1" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="var(--teal)"/>
+      </marker>
     </defs>
 
     <line x1="${tankLeft - 60}" y1="${tankTop + 4}" x2="${tankLeft - 60}" y2="${tankTop + 54}" stroke="var(--pink)" stroke-width="2.5" marker-end="url(#arrowRed1)"/>
     <text x="${tankLeft - 50}" y="${tankTop + 36}" fill="var(--pink)" font-size="15" font-weight="700" font-family="var(--sans)">g</text>
+    <text x="${tankLeft - 74}" y="${tankTop + 70}" fill="var(--pink)" font-size="11" font-weight="700" font-family="var(--mono)" text-anchor="middle">${fmt(d.g,2)} m/s²</text>
 
     <path d="M ${tankLeft} ${tankTop + 14}
              Q ${tankLeft} ${tankTop}, ${tankLeft + 14} ${tankTop}
@@ -92,7 +118,7 @@ function renderPart1(d, s) {
           fill="none" stroke="#5c7286" stroke-width="3" stroke-linejoin="round"/>
 
     <rect x="${tankLeft + 3}" y="${waterTop}" width="${tankW - 6}" height="${tankBottom - waterTop}" fill="url(#waterGrad1)"/>
-    <line x1="${tankLeft + 3}" y1="${waterTop}" x2="${tankRight - 3}" y2="${waterTop}" stroke="var(--teal)" stroke-width="2"/>
+    <line x1="${tankLeft + 3}" y1="${waterTop}" x2="${tankRight - 3}" y2="${waterTop}" stroke="${waterTopColor}" stroke-width="2"/>
 
     <rect x="${fillValveX}" y="${tankTop + 8}" width="9" height="${floatY - tankTop - 4}" rx="3" fill="#3b82f6"/>
     <circle cx="${fillValveX + 4}" cy="${tankTop + 8}" r="6" fill="#2563eb"/>
@@ -126,18 +152,34 @@ function renderPart1(d, s) {
     <text x="${gaugeX + 8}" y="${gaugeTop - 10}" fill="var(--muted-dim)" font-size="11" text-anchor="middle" font-family="var(--sans)">depth</text>
 
     <g font-family="var(--mono)">
-      <rect x="${eqX}" y="${eqY}" width="330" height="150" rx="10" fill="#0c1826" stroke="#22374a" stroke-width="1.5"/>
-      <text x="${eqX + 16}" y="${eqY + 26}" fill="var(--muted)" font-size="12" font-family="var(--sans)" font-weight="700">HYDROSTATIC EQUATION</text>
-      <text x="${eqX + 16}" y="${eqY + 56}" fill="var(--text)" font-size="18" font-weight="700">P = ρ · g · H</text>
-      <text x="${eqX + 16}" y="${eqY + 86}" fill="var(--muted)" font-size="14">P = 1000 × 9.81 × ${fmt(d.H,3)}</text>
-      <text x="${eqX + 16}" y="${eqY + 112}" fill="var(--teal)" font-size="20" font-weight="800">P = ${fmt(d.Phydro/1000,2)} kPa</text>
-      <text x="${eqX + 16}" y="${eqY + 138}" fill="var(--muted-dim)" font-size="11.5" font-family="var(--sans)">taller water column → higher pressure at the valve</text>
+      <rect x="${eqX}" y="${eqY}" width="380" height="196" rx="10" fill="#0c1826" stroke="#22374a" stroke-width="1.5"/>
+      <text x="${eqX + 16}" y="${eqY + 24}" fill="var(--muted)" font-size="12" font-family="var(--sans)" font-weight="700">BERNOULLI EQUATION</text>
+      <text x="${eqX + 16}" y="${eqY + 48}" fill="var(--text)" font-size="15.5" font-weight="700">P₁+½ρv₁²+ρgH = P₂+½ρv₂²</text>
+      <text x="${eqX + 16}" y="${eqY + 72}" fill="var(--muted)" font-size="13">v₂ = √( 2g(H−H_back) / (1−β²) )</text>
+      <text x="${eqX + 16}" y="${eqY + 94}" fill="var(--muted)" font-size="12.5">β = (d_valve/d_tank)² = ${fmt(d.beta,4)}</text>
+      <text x="${eqX + 16}" y="${eqY + 116}" fill="var(--muted)" font-size="12.5">H−H_back = ${fmt(d.H,3)} − ${fmt(d.Hback,3)} = ${fmt(d.driveHead,3)} m</text>
+      <text x="${eqX + 16}" y="${eqY + 148}" fill="var(--teal)" font-size="18" font-weight="800">v₂ = ${fmt(d.vIdeal,3)} m/s</text>
+      <text x="${eqX + 16}" y="${eqY + 172}" fill="var(--purple)" font-size="15" font-weight="700">v₁ = β·v₂ = ${fmt(d.v1,4)} m/s</text>
+      <text x="${eqX + 16}" y="${eqY + 190}" fill="var(--muted-dim)" font-size="11" font-family="var(--sans)">v₂ is pre-viscosity; actual exit uses Cd (below)</text>
     </g>
 
-    <text x="${tankLeft}" y="${tankTop - 16}" fill="var(--muted)" font-size="13.5" font-family="var(--sans)">cistern · 12 cm × 50 cm (fixed)</text>
+    <line x1="${surfaceX}" y1="${waterTop}" x2="${surfaceX}" y2="${waterTop + v1ArrowLen}" stroke="var(--purple)" stroke-width="2.5" marker-end="url(#arrowPurple1)" opacity="0.9"/>
+    <circle r="3.5" fill="var(--purple)">
+      <animateMotion dur="${v1Dur}s" repeatCount="indefinite" path="M ${surfaceX} ${waterTop} L ${surfaceX} ${waterTop + v1ArrowLen}"/>
+    </circle>
+    <text x="${surfaceX + 10}" y="${waterTop + v1ArrowLen + 14}" fill="var(--purple)" font-size="12" font-weight="700" font-family="var(--mono)">v₁ = ${fmt(d.v1,4)} m/s</text>
+
+    <line x1="${v2X}" y1="${tankBottom}" x2="${v2X}" y2="${tankBottom + jetLenIdeal}" stroke="var(--teal)" stroke-width="2.5" stroke-dasharray="4 4" marker-end="url(#arrowTeal1)" opacity="0.9"/>
+    <circle r="3.5" fill="var(--teal)">
+      <animateMotion dur="${v2Dur}s" repeatCount="indefinite" path="M ${v2X} ${tankBottom} L ${v2X} ${tankBottom + jetLenIdeal}"/>
+    </circle>
+    <text x="${v2X - 8}" y="${tankBottom - 8}" fill="var(--teal)" font-size="12" font-weight="700" font-family="var(--sans)" text-anchor="end">v₂ (ideal)</text>
+    <text x="${v2X - 8}" y="${tankBottom + jetLenIdeal + 16}" fill="var(--teal)" font-size="12.5" font-weight="800" font-family="var(--mono)" text-anchor="end">${fmt(d.vIdeal,2)} m/s</text>
+
+    <text x="${tankLeft}" y="${tankTop - 16}" fill="var(--muted)" font-size="13.5" font-family="var(--sans)">cistern · length 50cm (fixed) · effective Ø ${fmt(s.dTank,0)} mm</text>
     <text x="${gapCenter - 34}" y="${tankBottom + 26}" fill="var(--muted)" font-size="12.5" font-family="var(--sans)">flush valve</text>
     <text x="${tankLeft + 8}" y="${waterTop - 8}" fill="var(--teal)" font-size="12.5" font-weight="600" font-family="var(--sans)">H = ${fmt(s.H,0)} cm</text>
-    <text x="${gapCenter}" y="${tankBottom + jetLen + 48}" text-anchor="middle" fill="var(--orange)" font-size="14" font-weight="700" font-family="var(--mono)">v = ${fmt(d.vExit,2)} m/s</text>
+    <text x="${gapCenter + 20}" y="${Math.min(tankBottom + jetLen + 22, Hh - 10)}" text-anchor="start" fill="var(--orange)" font-size="13" font-weight="700" font-family="var(--mono)">v (actual, w/ Cd) = ${fmt(d.vExit,2)} m/s</text>
   </svg>`;
   document.getElementById('svgPart1').innerHTML = svg;
 }
