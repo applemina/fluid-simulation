@@ -7,8 +7,24 @@ for the rendered equations) and Google Fonts.
 
 ## File layout
 
+**`index.html` is now fully self-contained** — all six modules
+(`config/utils/physics/renderers/ui/main`) are inlined into one `<script>`
+block at the bottom of the page, in dependency order. This was a deliberate
+fix: the previous version loaded them as six separate `<script src="js/...">`
+tags, and if that `js/` folder ever goes missing, gets renamed, or has a
+path/case mismatch on deploy, every one of those tags fails silently — the
+page still renders (HTML/CSS are unaffected) but `state` and all the
+render/physics functions come back `undefined`, so the sliders look inert
+and the diagrams stay blank. Inlining removes that whole failure class.
+
+The original six files are still included below for reference/editing — if
+you change one, re-paste it into the inline `<script>` block in `index.html`
+(same order: config, utils, physics, renderers, ui, main) rather than
+re-linking them externally, unless you've confirmed your host serves the
+`js/` folder correctly.
+
 ```
-index.html
+index.html      - self-contained: HTML + CSS link + one inlined <script>
 style.css
 js/
   config.js     - constants + shared state (H, dValve, dTank, g)
@@ -21,8 +37,9 @@ js/
 
 ## Run it locally
 
-Open `index.html` directly, or serve the folder (`python3 -m http.server`)
-so the relative `js/*.js` script tags resolve.
+Just open `index.html` directly — no server needed anymore, since there
+are no external script files to fetch (KaTeX still loads from a CDN for
+the derivation panel, with a plain-text fallback if that's blocked).
 
 ## Push to GitHub + deploy with GitHub Pages
 
