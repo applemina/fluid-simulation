@@ -1,37 +1,89 @@
-Github main repository for 2026 May Term - 30.103 : Fluid Mechanics 1D Project
+# Toilet Flush Mechanism — Bernoulli & Continuity Demo
 
-Toilet flush (gravity) mechanism
+Interactive 3-part simulation of a gravity-flush toilet, now built purely on
+Bernoulli's equation (head form) + the continuity equation — incompressible,
+inviscid, steady flow. No build step, no dependencies besides KaTeX (via CDN,
+for the rendered equations) and Google Fonts.
 
-What does it take to get your shit down??
+## File layout
 
-[Part 1]
-Concept used:
-Bernoulli's equation (head form)
-P1/gamma + v1 ^2/2g + z1 = P2/gamma + v2 ^2/2g + z0
+```
+index.html
+style.css
+js/
+  config.js     - constants + shared state (H, dValve, dTank, g)
+  utils.js      - clamp / lerp / fmt / lerpColor
+  physics.js    - compute(state) -> Bernoulli + continuity solution
+  renderers.js  - renderPart1/2/3(d, state) -> SVG strings
+  ui.js         - slider/preset/flush-button wiring + readouts
+  main.js       - bootstraps everything, renders the KaTeX derivation
+```
 
-P1 and P2 can be assumed to be zero as gauge pressure, and points where the fluid is in contact with the surroundings
+## Run it locally
 
-What we can vary:
-- tank water level (z1)
-- gravity values
+Open `index.html` directly, or serve the folder (`python3 -m http.server`)
+so the relative `js/*.js` script tags resolve.
 
-Observation:
-at t = 0+, what are the values of v1 and v2
-v1 and v2 converge as tank water level decreases
+## Push to GitHub + deploy with GitHub Pages
 
-[Part 2]
-Concept used:
-Mass flow rate - continuity equation
-A1v1ro1 = A2v2ro2
+```bash
+git init
+git add .
+git commit -m "Bernoulli + continuity toilet flush demo"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<repo-name>.git
+git push -u origin main
+```
 
-What we can vary:
-- sliders for A1/A2 diameter (observing their ratios)
+Then **Settings → Pages → Source → Deploy from a branch → `main` / root**.
+Site goes live at `https://<your-username>.github.io/<repo-name>/`.
 
-[Part 3]
-^^ expand to a side view of toilet
+## Physics model (`js/physics.js`)
 
-What we can vary:
-- based on above sliders
+Between the free surface (1) and the valve exit (2), both open to the
+atmosphere (P1 = P2 = 0 gauge), with the datum z2 = 0 at the valve:
 
-what we can track:
-- is the shit still there? (SUCCESS! vs FAILURE TO FLUSH!)
+**Bernoulli, head form:**
+```
+P1/pg + v1^2/2g + z1 = P2/pg + v2^2/2g + z2
+```
+
+**Continuity (mass flow rate), rho1 = rho2:**
+```
+A1 v1 = A2 v2  =>  v1 = (A2/A1) v2 = beta * v2,   beta = (d_valve / d_tank)^2
+```
+
+**Substituting and solving for v2:**
+```
+v1^2 + 2g z1 = v2^2
+(beta v2)^2 + 2g z1 = v2^2
+v2 = sqrt( 2 g z1 / (1 - beta^2) )
+```
+
+No discharge coefficient, viscosity, or rim-hole losses — this is the
+idealized head-form result, matching the assumptions boxed in the
+derivation (incompressible / inviscid / steady).
+
+**Synthesis (Part 3):**
+- Flush volume `Vtank = 0.12m x 0.50m x z1` (the fixed 12x50cm tank footprint)
+- Flush time `t_flush = Vtank / Q`
+- Success requires both `Q > 1.0 L/s` and `t_flush < 8s` — tune these two
+  constants in `physics.js` (`QOK`, `tOK`) if you want stricter/looser
+  pass/fail behavior.
+
+## Sliders
+
+- **z1 = H** — tank water level (cm)
+- **g** — gravity, with Moon/Mars/Earth/Jupiter presets
+- **d_tank** — A1's diameter (mm)
+- **d_valve** — A2's diameter (mm)
+
+## Extending it
+
+- Add a real time-varying drain (z1 decreasing as the tank empties, i.e.
+  actually integrating dz1/dt = -Q(z1)/A_tank) for a true transient
+  simulation instead of the current quasi-steady snapshot.
+- The observation callout in Part 1 ("v1, v2 converge as z1 -> 0") could be
+  turned into a small live plot of v1(t) and v2(t) during an actual drain.
+- `renderPart2`'s converging-duct diagram and area-ratio bars are self
+  contained in `renderers.js` — easy to restyle without touching physics.

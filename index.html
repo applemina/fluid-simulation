@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toilet Flush Mechanism · Bernoulli &amp; Continuity Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow"><span class="bar"></span>FLUID MECHANICS · GRAVITY FLUSH DEMO</div>
+  <h1>What does it take to get your <span class="accent2">shit</span> down?</h1>
+  <p class="lede">
+    A gravity-flush toilet is an <b>incompressible, inviscid, steady-flow</b> problem in two linked
+    pieces: <b>Bernoulli's equation</b> ties the tank's water level to the valve's exit speed, and
+    the <b>continuity equation</b> ties that speed to how the tank and valve cross-sections compare.
+    Tune the tank level, gravity, and the two diameters below, then flush and see whether the bowl
+    actually clears.
+  </p>
+
+  <div class="grid">
+
+    <!-- ===================== LEFT: VISUALIZATION / ACCORDION ===================== -->
+    <div class="panel">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span>v₂ · valve / throat</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--purple)"></span>v₁ · free surface</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--orange)"></span>Exit jet</div>
+        <div class="legend-item"><span class="legend-swatch" style="background:var(--pink)"></span>Gravity g</div>
+      </div>
+
+      <details class="part" open id="detailsPart1">
+        <summary>
+          <div class="part-num">1</div>
+          <div class="part-titles">
+            <div class="part-title">Energy Source — Bernoulli's Equation (Head Form)</div>
+            <div class="part-sub">Tank water level (z₁) and gravity set the valve's exit speed</div>
+          </div>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="part-body">
+          <div class="viz-frame"><svg id="svgPart1" viewBox="0 0 900 460"></svg></div>
+          <p class="concept-note">
+            <b>Bernoulli, head form:</b> P₁/ρg + v₁²/2g + z₁ = P₂/ρg + v₂²/2g + z₂. Both the free
+            surface and the valve exit are open to the atmosphere, so P₁ = P₂ = 0 gauge — the whole
+            balance comes down to elevation head (z₁) converting into velocity head.
+          </p>
+          <div class="mini-readouts">
+            <div class="mini-stat"><div class="lbl">Hydrostatic pressure ρgH</div><div class="val c-teal" id="roPhydro">–</div></div>
+            <div class="mini-stat"><div class="lbl">v₂ (valve exit)</div><div class="val c-teal" id="roV2">–</div></div>
+            <div class="mini-stat"><div class="lbl">v₁ (free surface)</div><div class="val c-purple" id="roV1">–</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="part" id="detailsPart2">
+        <summary>
+          <div class="part-num">2</div>
+          <div class="part-titles">
+            <div class="part-title">Mass Flow Rate — Continuity Equation</div>
+            <div class="part-sub">The A₁/A₂ diameter ratio (β) is what links v₁ and v₂</div>
+          </div>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="part-body">
+          <div class="viz-frame"><svg id="svgPart2" viewBox="0 0 900 460"></svg></div>
+          <p class="concept-note">
+            <b>Continuity (conservation of mass):</b> A₁v₁ρ₁ = A₂v₂ρ₂. With an incompressible fluid
+            (ρ₁ = ρ₂), this reduces to a pure area ratio: v₁ = (A₂/A₁)v₂ = β·v₂. A narrow valve
+            relative to the tank (small β) means v₁ ≈ 0 is a good approximation; as the valve
+            approaches the tank's own size, v₁ stops being negligible.
+          </p>
+          <div class="mini-readouts">
+            <div class="mini-stat"><div class="lbl">β = A₂/A₁</div><div class="val c-orange" id="roBeta">–</div></div>
+            <div class="mini-stat"><div class="lbl">Flow rate Q</div><div class="val c-teal" id="roQ">–</div></div>
+          </div>
+        </div>
+      </details>
+
+      <details class="part" id="detailsPart3">
+        <summary>
+          <div class="part-num">3</div>
+          <div class="part-titles">
+            <div class="part-title">Overall Synthesis — Side View</div>
+            <div class="part-sub">Combining parts 1 &amp; 2: is the flush a success or a failure?</div>
+          </div>
+          <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </summary>
+        <div class="part-body">
+          <div class="viz-frame"><svg id="svgPart3" viewBox="0 0 900 460"></svg></div>
+          <p class="concept-note">
+            No new sliders here — this view just synthesizes Parts 1 &amp; 2. Press flush: if the
+            resulting flow rate drains the tank fast enough, the waste clears the trapway; otherwise
+            it's still sitting there when the water settles.
+          </p>
+          <button id="btnFlush" class="flush-btn">🚽 Flush Toilet</button>
+        </div>
+      </details>
+
+      <!-- ===================== FULL DERIVATION (KaTeX) ===================== -->
+      <details class="explanation">
+        <summary>Full derivation — from Bernoulli + continuity to v₂</summary>
+        <div class="explanation-body">
+          <div class="exp-step exp-step-solo">
+            <div class="exp-text">
+              <h4>1. Bernoulli's equation, head form</h4>
+              <p>Between the free surface (1) and the valve exit (2), with both points open to the atmosphere so <b>P₁ = P₂ = 0</b> gauge, and the datum <b>z₂ = 0</b> set at the valve:</p>
+              <div class="eq" data-eq="eq1"></div>
+            </div>
+          </div>
+          <div class="exp-step exp-step-solo">
+            <div class="exp-text">
+              <h4>2. Continuity — conservation of mass</h4>
+              <p>The same mass flow rate passes through the free surface and the valve. For an incompressible fluid (ρ₁ = ρ₂), this collapses to a diameter ratio, <b>β</b>:</p>
+              <div class="eq" data-eq="eq2"></div>
+            </div>
+          </div>
+          <div class="exp-step exp-step-solo">
+            <div class="exp-text">
+              <h4>3. Substitute and solve for v₂</h4>
+              <p>Dropping the (zero) pressure terms and z₂, then substituting v₁ = βv₂ from continuity:</p>
+              <div class="eq" data-eq="eq4"></div>
+            </div>
+          </div>
+          <p class="exp-footnote">Assumptions boxed in the derivation: incompressible flow, inviscid flow, steady flow. No discharge coefficient, viscosity, or rim-hole losses enter this model — it's the idealized head-form result.</p>
+        </div>
+      </details>
+    </div>
+
+    <!-- ===================== RIGHT: CONTROLS ===================== -->
+    <div class="panel">
+
+      <div class="ctrl-group">
+        <div class="ctrl-group-title"><span class="dot" style="background:var(--teal)"></span>Part 1 · Bernoulli</div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Tank water level z₁ = H</span><span class="value" id="labelH">20 cm</span></div>
+          <input type="range" id="sliderH" min="5" max="45" step="1">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Gravity g</span><span class="value" id="labelG">9.81 m/s²</span></div>
+          <input type="range" id="sliderG" min="1.62" max="24.79" step="0.01">
+        </div>
+
+        <div class="preset-row preset-row-4">
+          <button class="preset-btn-g" data-g="1.62">Moon</button>
+          <button class="preset-btn-g" data-g="3.71">Mars</button>
+          <button class="preset-btn-g" data-g="9.81">Earth</button>
+          <button class="preset-btn-g" data-g="24.79">Jupiter</button>
+        </div>
+      </div>
+
+      <div class="ctrl-group">
+        <div class="ctrl-group-title"><span class="dot" style="background:var(--orange)"></span>Part 2 · Continuity</div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Tank diameter d_tank (A₁)</span><span class="value" id="labelDTank">276 mm</span></div>
+          <input type="range" id="sliderDTank" min="100" max="350" step="1">
+        </div>
+
+        <div class="slider-row">
+          <div class="slider-label"><span>Valve diameter d_valve (A₂)</span><span class="value" id="labelDValve">45 mm</span></div>
+          <input type="range" id="sliderDValve" min="15" max="90" step="1">
+        </div>
+      </div>
+
+      <div class="readouts">
+        <div class="readout-row">
+          <div class="readout-label">Flow rate Q <small>(at valve)</small></div>
+          <div class="readout-value c-teal"><span id="roQMain">–</span><span class="unit">L/s</span></div>
+        </div>
+        <div class="readout-row">
+          <div class="readout-label">Flush time t_flush</div>
+          <div class="readout-value c-orange"><span id="roTFlush">–</span><span class="unit">s</span></div>
+        </div>
+      </div>
+
+      <div class="verdict-card success" id="verdictCard">
+        <div class="verdict-label">Part 3 · Flush Verdict</div>
+        <div class="verdict-headline" id="verdictHeadline">–</div>
+        <div class="verdict-detail" id="verdictDetail">–</div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer class="credit">Idealized incompressible / inviscid / steady-flow model for teaching purposes — not a substitute for plumbing code compliance.</footer>
+</div>
+
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/renderers.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
