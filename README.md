@@ -9,13 +9,15 @@ Concept used:
 Bernoulli's equation (head form)
 P1/gamma + v1 ^2/2g + z1 = P2/gamma + v2 ^2/2g + z0
 
+P1 and P2 can be assumed to be zero as gauge pressure, and points where the fluid is in contact with the surroundings
+
 What we can vary:
 - tank water level (z1)
-- viscosity of liquid used (use some soap solution or smth)
+- gravity values
 
 Observation:
 at t = 0+, what are the values of v1 and v2
-v1 and v2 converge as tank water level decreases and viscosity increases
+v1 and v2 converge as tank water level decreases
 
 [Part 2]
 Concept used:
@@ -24,7 +26,6 @@ A1v1ro1 = A2v2ro2
 
 What we can vary:
 - sliders for A1/A2 diameter (observing their ratios)
-- shape? (circle vs square)
 
 [Part 3]
 ^^ expand to a side view of toilet
