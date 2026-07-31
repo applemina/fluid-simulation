@@ -73,9 +73,9 @@ function compute(s) {
   const Vtank = (TANK_WIDTH_CM / 100) * (TANK_LENGTH_CM / 100) * H; // m^3
   const tFlush = Q > 1e-9 ? Vtank / Q : Infinity; // idealized constant-flow drain time, s
 
-  const QOK = Q_Lps > 0.4;
-  const shearOK = tauWall > 0.08;
-  const success = QOK && shearOK && isFinite(tFlush) && tFlush < 25;
+  const QOK = Q_Lps > 0.7;
+  const shearOK = tauWall > 4;
+  const success = QOK && shearOK && isFinite(tFlush) && tFlush < 11;
 
   return {
     H, mu, dValve, g, Avalve, Phydro, vIdeal, Re, Cd, vExit, Q, Q_Lps,

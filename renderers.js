@@ -7,7 +7,11 @@ function renderPart1(d, s) {
   const W = 900, Hh = 460;
 
   const pxPerCm = 6.2;
-  const tankW = TANK_WIDTH_CM * pxPerCm;
+  // Tank WIDTH in the drawing now tracks the dTank slider (the effective diameter used in
+  // continuity), so users can see it grow/shrink. This is a drawn proxy, not the physical
+  // footprint: Vtank/tFlush still use the fixed 12x50cm rectangular footprint regardless.
+  const pxPerMmTank = 0.55;
+  const tankW = clamp(s.dTank * pxPerMmTank, 30, 260);
   const tankH = TANK_LENGTH_CM * pxPerCm;
   const tankLeft = 130, tankTop = 46;
   const tankRight = tankLeft + tankW, tankBottom = tankTop + tankH;
@@ -64,19 +68,24 @@ function renderPart1(d, s) {
   const v2X = tankLeft - 20;
   const v2Dur = clamp(2.0 - d.vIdeal * 0.6, 0.35, 2.0).toFixed(2);
 
-  const gaugeX = tankRight + 34;
+  const gaugeX = tankRight + 40;
   const gaugeTop = tankTop, gaugeBottom = tankBottom;
   const gaugeSurfaceY = waterTop;
   const gaugeValveY = tankBottom;
 
-  const eqX = gaugeX + 60, eqY = tankTop + 6;
+  const eqX = gaugeX + 80, eqY = tankTop + 6;
+
+  // Water color shifts teal -> red with viscosity, log-scaled to match the mu slider (1-500 mPa·s).
+  const muT = clamp(Math.log(Math.max(s.mu, 1)) / Math.log(500), 0, 1);
+  const waterTopColor = lerpColor('2dd4bf', 'e5484d', muT);
+  const waterBottomColor = lerpColor('0e9384', '7a1f1f', muT);
 
   const svg = `
   <svg viewBox="0 0 ${W} ${Hh}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="waterGrad1" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.30"/>
-        <stop offset="100%" stop-color="#0e9384" stop-opacity="0.85"/>
+        <stop offset="0%" stop-color="${waterTopColor}" stop-opacity="0.30"/>
+        <stop offset="100%" stop-color="${waterBottomColor}" stop-opacity="0.85"/>
       </linearGradient>
       <linearGradient id="pgaugeGrad" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#12786c" stop-opacity="0.15"/>
@@ -109,7 +118,7 @@ function renderPart1(d, s) {
           fill="none" stroke="#5c7286" stroke-width="3" stroke-linejoin="round"/>
 
     <rect x="${tankLeft + 3}" y="${waterTop}" width="${tankW - 6}" height="${tankBottom - waterTop}" fill="url(#waterGrad1)"/>
-    <line x1="${tankLeft + 3}" y1="${waterTop}" x2="${tankRight - 3}" y2="${waterTop}" stroke="var(--teal)" stroke-width="2"/>
+    <line x1="${tankLeft + 3}" y1="${waterTop}" x2="${tankRight - 3}" y2="${waterTop}" stroke="${waterTopColor}" stroke-width="2"/>
 
     <rect x="${fillValveX}" y="${tankTop + 8}" width="9" height="${floatY - tankTop - 4}" rx="3" fill="#3b82f6"/>
     <circle cx="${fillValveX + 4}" cy="${tankTop + 8}" r="6" fill="#2563eb"/>
@@ -167,7 +176,7 @@ function renderPart1(d, s) {
     <text x="${v2X - 8}" y="${tankBottom - 8}" fill="var(--teal)" font-size="12" font-weight="700" font-family="var(--sans)" text-anchor="end">v₂ (ideal)</text>
     <text x="${v2X - 8}" y="${tankBottom + jetLenIdeal + 16}" fill="var(--teal)" font-size="12.5" font-weight="800" font-family="var(--mono)" text-anchor="end">${fmt(d.vIdeal,2)} m/s</text>
 
-    <text x="${tankLeft}" y="${tankTop - 16}" fill="var(--muted)" font-size="13.5" font-family="var(--sans)">cistern · 12 cm × 50 cm (fixed)</text>
+    <text x="${tankLeft}" y="${tankTop - 16}" fill="var(--muted)" font-size="13.5" font-family="var(--sans)">cistern · length 50cm (fixed) · effective Ø ${fmt(s.dTank,0)} mm</text>
     <text x="${gapCenter - 34}" y="${tankBottom + 26}" fill="var(--muted)" font-size="12.5" font-family="var(--sans)">flush valve</text>
     <text x="${tankLeft + 8}" y="${waterTop - 8}" fill="var(--teal)" font-size="12.5" font-weight="600" font-family="var(--sans)">H = ${fmt(s.H,0)} cm</text>
     <text x="${gapCenter + 20}" y="${Math.min(tankBottom + jetLen + 22, Hh - 10)}" text-anchor="start" fill="var(--orange)" font-size="13" font-weight="700" font-family="var(--mono)">v (actual, w/ Cd) = ${fmt(d.vExit,2)} m/s</text>
